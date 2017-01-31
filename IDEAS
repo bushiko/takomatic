@@ -1,0 +1,60 @@
+DIRECTIONS API
+https://developers.google.com/maps/documentation/directions/intro?hl=es-419
+
+CUSTOM MARKER
+https://developers.google.com/maps/documentation/javascript/custom-markers
+
+MAYBE SSE?
+http://stackoverflow.com/questions/29541775/laravel-5-use-server-sent-events-to-push-messages-to-browser
+
+
+
+
+https://maps.googleapis.com/maps/api/directions/json?origin=Toronto&destination=Montreal&key=AIzaSyDIlyw3fC4QRIJaxf8O4_Usybp-30Onh8I
+
+
+
+origin=19.4319723,-99.13340439999999
+
+destination=19.2798589,-99.65565909999999
+
+
+
+--- REQERIMIENTOS
+
+ENTIDADES:
+  * CLIENT
+  * DRIVER
+
+
+METODOS DEL API:
+  * clients               PUT || PATCH
+  * drivers               PUT || PATCH
+  * client/{ID}/position       PUT || PATCH
+  * driver/{ID}/position       PUT || PATCH
+
+  * /drivers              GET
+  * /clients              GET
+
+DIFERENCIACIÓN ENTRE client y driver
+
+LÍNEA (walking) driver -> closestclient
+
+PAUSAR LA APP? (cliente o servidor?)
+
+--- IDEA, IN PROGRESS...
+
+- Al iniciar el web app (angular), se pregunta cuántos drivers y cuántos clients emular
+- se registra cada uno de ellos en el api 
+  POST /client, POST /driver 
+- Los drivers y clients deberán tener un "auto movimiento", ésto en el cliente
+- Cada cierto tiempo deberán actualizar su posición al api 
+  client/{ID}/position, driver/{ID}/position
+
+
+----- EXTRAS
+
+
+MOSTRAR TRACE
+MONTAR INSTANCIA EN UN SERVIDOR LIVE
+SIMULACIÓN COHERENTE DE DRIVERS Y CLIENTS

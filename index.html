@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TakoMatic</title>
+</head>
+<body>
+
+  <div ui-view></div>
+
+  <script src="bower_components/requirejs/require.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    require.config({baseUrl: 'app'});
+    require(['index']);
+  </script>
+</body>
+</html>
