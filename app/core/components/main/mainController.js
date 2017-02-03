@@ -28,6 +28,16 @@ define([
         }
       };
 
+      /*mapbox*/
+      $scope.defaults = {
+        tileLayer: 'https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token=' + MAPBOX_API_KEY
+      };
+      $scope.maxbounds = {
+        southWest: BOUNDS.sw,
+        northEast: BOUNDS.ne
+      };
+      /*mapbox*/
+
     	this.markers = [{
   			position:getRandomCoords(BOUNDS),
   			label: 'random1'
@@ -84,6 +94,10 @@ define([
           _this.driverList.push(data.driver);
         });
       });
+
+      PusherCli.client.bind('driver-location-changed', function(data) {
+        console.log(data);
+      });
     };
 
     this.saveDriver = function(newDriver) {
@@ -101,6 +115,10 @@ define([
         // no agregamos hasta que pusher nos notifique
       }, function(err){
         delete _this.savingDriver;
+
+        if (angular.isObject(err.data) && err.status === 422) {
+          _this.driverErrors = err.data;
+        }
       });
     };
 

@@ -7,8 +7,12 @@ https://developers.google.com/maps/documentation/javascript/custom-markers
 MAYBE SSE?
 http://stackoverflow.com/questions/29541775/laravel-5-use-server-sent-events-to-push-messages-to-browser
 
+explore MapBox (?)
 
+http://angular-ui.github.io/ui-leaflet/#!/examples/simple-map
 
+-99.180532,19.423934;-99.16893119999999,19.4143384
+https://api.mapbox.com/directions/v5/mapbox/walking/-99.180532%2C19.423934%3B-99.16893119999999%2C19.4143384.json?access_token=pk.eyJ1IjoiYnVzaGlrbyIsImEiOiJjaXlxNWQ5b2QwMDA0MzNqeWF0cnJpZjZjIn0.E285dGJXFW58Qm6q-GdmIg&steps=true&overview=false
 
 https://maps.googleapis.com/maps/api/directions/json?origin=Toronto&destination=Montreal&key=AIzaSyDIlyw3fC4QRIJaxf8O4_Usybp-30Onh8I
 

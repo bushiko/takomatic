@@ -13,7 +13,12 @@
   <div class="columns">
     <div class="column is-two-thirds">
       <div class="box">
-        <ng-map 
+        <leaflet 
+          maxbounds="maxbounds"
+          defaults="defaults" 
+          height="480px" 
+          width="100%"></leaflet>
+   <!--      <ng-map 
           style="height: 500px; background: #00d1b2;"
           zoom="13"
           min-zoom="13"
@@ -22,7 +27,7 @@
             ng-repeat="mk in vm.markers" 
             position="{{mk.position}}"
             label="{{mk.label}}"></marker>
-        </ng-map>
+        </ng-map> -->
         <!-- <map-dash></map-dash> -->
       </div>
     </div>
@@ -45,15 +50,21 @@
             <li ng-repeat="driver in vm.driverList">{{::driver.name}}</li>
           </ul>
 
-          <p class="control has-addons">
-            <input ng-model="newD.name" class="input" type="text" placeholder="nombre">
-            <a 
-              ng-class="{'is-loading': vm.savingDriver}"
-              ng-click="vm.saveDriver(newD)"
-              class="button is-primary">
-              +
-            </a>
-          </p>
+          <form ng-submit="vm.saveDriver(newD)">
+            <p class="control has-addons">
+              <input 
+                ng-model="newD.name" 
+                ng-class="{'is-danger': vm.driverErrors.name}"
+                class="input" type="text" placeholder="nombre">
+              <a 
+                ng-class="{'is-loading': vm.savingDriver}"
+                ng-click="vm.saveDriver(newD)"
+                class="button is-primary">
+                +
+              </a>
+              <small ng-show="vm.driverErrors.name">{{vm.driverErrors.name}}</small>
+            </p>
+          </form>
         </div>
 
       </div>

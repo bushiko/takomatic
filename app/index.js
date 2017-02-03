@@ -8,6 +8,9 @@ require.config({
     'ng-map': '../bower_components/ngmap/build/scripts/ng-map.min',
     'angular-resource': '../bower_components/angular-resource/angular-resource.min',
     'pusher': '../bower_components/pusher-js/dist/web/pusher',
+    'ui-leaflet': '../bower_components/ui-leaflet/dist/ui-leaflet.min',
+    'leaflet': '../bower_components/leaflet/dist/leaflet',
+    'angular-simple-logger': '../bower_components/angular-simple-logger/dist/angular-simple-logger.min',
     'mainModule': 'core/mainModule'
   },
   shim: {
@@ -18,6 +21,8 @@ require.config({
     'ui-router': ['angular'],
     'ng-map': ['angular'],
     'angular-resource': ['angular'],
+    'ui-leaflet': ['angular', 'leaflet', 'angular-simple-logger'],
+    'angular-simple-logger': ['angular']
   },
   deps: ['mainModule']
 });
