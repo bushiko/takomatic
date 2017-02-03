@@ -1,10 +1,10 @@
 define([
 	'angularAMD',
 	'core/routes',
-  // libraries
+  	// libraries
 	'ui-router',
-  'angular-resource',
-  'ng-map'
+	'angular-resource',
+	'ng-map'
 ], function(angularAMD, routes) {
 	'use strict';
 
@@ -12,9 +12,9 @@ define([
 
 	mainModule.config(routes);
 
-  mainModule.constant('API_URL', 'http://localhost:8000');
+	mainModule.constant('API_URL', 'http://localhost:8000');
 
-  mainModule.run(function($state) {
+	mainModule.run(function($state) {
 
     $state.go('main');
   });

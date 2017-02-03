@@ -4,15 +4,19 @@ define([
   'google-maps',
   'core/resources/driverResource',
   'core/resources/clientResource',
+  'core/services/PusherCli',
 ], function(mainModule) {
 	'use strict';
 
 	mainModule.controller('mainController', mainController);
 
-	function mainController($scope, NgMap, driverResource, clientResource) {
+	function mainController($scope, NgMap, driverResource, clientResource, PusherCli) {
 		var _this = this;
 
     this.init = function() {
+      this.driverList = [];
+      this.clientList = [];
+
       var BOUNDS = {
         sw: {
           lat: 19.3575374,
@@ -31,6 +35,7 @@ define([
   			position: getRandomCoords(BOUNDS),
   			label: 'random2'
   		}];
+
 
   		// $interval(function() {
   		// 	_this.markers[0].position = getRandomCoords(BOUNDS);
@@ -61,12 +66,41 @@ define([
 
       // Obtenemos drivers
       driverResource.query(function(res) {
+        _this.driverList = res;
       	console.log(res);
       });
 
       // Obtenemos clients
       clientResource.query(function(res) {
+        _this.clientList = res;
       	console.log(res);
+      });
+
+      PusherCli.client.subscribe('tako-channel');
+      PusherCli.client.bind('new-driver', function(data) {
+        console.log(data);
+
+        $scope.$apply(function() {
+          _this.driverList.push(data.driver);
+        });
+      });
+    };
+
+    this.saveDriver = function(newDriver) {
+      if(!angular.isObject(newDriver)
+        || typeof newDriver.name !== 'string') {return;}
+
+      var fd = new FormData();
+      fd.append('name', newDriver.name);
+
+      this.savingDriver = true;
+      driverResource.save(fd, function(res) {
+        delete _this.savingDriver;
+        newDriver.name = '';
+
+        // no agregamos hasta que pusher nos notifique
+      }, function(err){
+        delete _this.savingDriver;
       });
     };
 

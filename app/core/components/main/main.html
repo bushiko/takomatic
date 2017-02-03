@@ -27,7 +27,36 @@
       </div>
     </div>
     <div class="column">
-      <div class="box"></div>
+      <div class="box">
+        
+        <div ng-init="activeTab = 'drivers'" class="tabs is-small">
+          <ul>
+            <li 
+              ng-click="activeTab = 'drivers'"
+              ng-class="{'is-active': activeTab === 'drivers'}"><a>Conductores</a></li>
+            <li
+              ng-click="activeTab = 'clients'"
+              ng-class="{'is-active': activeTab === 'clients'}"><a>Clientes</a></li>
+          </ul>
+        </div>
+
+        <div ng-show="activeTab === 'drivers'">
+          <ul>
+            <li ng-repeat="driver in vm.driverList">{{::driver.name}}</li>
+          </ul>
+
+          <p class="control has-addons">
+            <input ng-model="newD.name" class="input" type="text" placeholder="nombre">
+            <a 
+              ng-class="{'is-loading': vm.savingDriver}"
+              ng-click="vm.saveDriver(newD)"
+              class="button is-primary">
+              +
+            </a>
+          </p>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>

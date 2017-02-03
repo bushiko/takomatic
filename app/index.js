@@ -7,6 +7,7 @@ require.config({
     'text': '../bower_components/requirejs-text/text',
     'ng-map': '../bower_components/ngmap/build/scripts/ng-map.min',
     'angular-resource': '../bower_components/angular-resource/angular-resource.min',
+    'pusher': '../bower_components/pusher-js/dist/web/pusher',
     'mainModule': 'core/mainModule'
   },
   shim: {
@@ -16,7 +17,7 @@ require.config({
     'angularAMD': ['angular'],
     'ui-router': ['angular'],
     'ng-map': ['angular'],
-    'angular-resource': ['angular']
+    'angular-resource': ['angular'],
   },
   deps: ['mainModule']
 });
