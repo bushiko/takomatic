@@ -76,13 +76,17 @@ PAUSAR LA APP? (cliente o servidor?)
 
 --- IDEA, IN PROGRESS...
 
-- Al iniciar el web app (angular), se pregunta cuántos drivers y cuántos clients emular
-- se registra cada uno de ellos en el api 
-  POST /client, POST /driver 
-- Los drivers y clients deberán tener un "auto movimiento", ésto en el cliente
-- Cada cierto tiempo deberán actualizar su posición al api 
-  client/{ID}/position, driver/{ID}/position
+Creo que ya tengo algo mejor pensado:
 
+  * Usar PUSHER para mantener sincronizados a los clientes con eventos como:
+    - new_user (driver || client)
+    - user_location_change
+    - user_deleted
+
+  * Crear rutas aleatorias por user en el servidor y :
+  * Usar colas.. (RabbitMQ? IronMQ?) para agendar jobs que actualizarán la posición dependiendo la ruta
+  * El cliente solo va a encargarse de actualizar la posición de los markers cada que reciba el evento
+    user_location_change
 
 ----- EXTRAS
 

@@ -1,6 +1,6 @@
 <nav style="margin-bottom: 20px;" class="nav has-shadow">
   <div class="nav-left">
-    <a class="nav-item is-tab ">
+    <a class="nav-item is-tab">
       <img src="images/tako_.png">
     </a>
     <a class="nav-item is-tab is-active">Home</a>
@@ -13,7 +13,17 @@
   <div class="columns">
     <div class="column is-two-thirds">
       <div class="box">
-        <map-dash></map-dash>
+        <ng-map 
+          style="height: 500px; background: #00d1b2;"
+          zoom="13"
+          min-zoom="13"
+        >
+          <marker 
+            ng-repeat="mk in vm.markers" 
+            position="{{mk.position}}"
+            label="{{mk.label}}"></marker>
+        </ng-map>
+        <!-- <map-dash></map-dash> -->
       </div>
     </div>
     <div class="column">
