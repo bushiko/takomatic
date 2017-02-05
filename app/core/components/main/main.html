@@ -14,19 +14,30 @@
     <div class="column is-two-thirds">
       <div class="box">
         <leaflet 
-          maxbounds="maxbounds"
-          defaults="defaults" 
+          maxbounds="vm.maxbounds"
+          defaults="vm.defaults"
+          markers="vm.markers" 
+          paths="vm.paths"
+          layers="vm.layers"
           height="480px" 
           width="100%"></leaflet>
-   <!--      <ng-map 
+        <!-- <ng-map 
           style="height: 500px; background: #00d1b2;"
           zoom="13"
           min-zoom="13"
         >
           <marker 
-            ng-repeat="mk in vm.markers" 
-            position="{{mk.position}}"
-            label="{{mk.label}}"></marker>
+            ng-repeat-start="mk in vm.driverList" 
+            position="{{vm.getPosition(mk)}}"
+            label="{{mk.name}}"
+            ></marker>
+          <path
+            ng-repeat-end
+            geodesic="true"
+            stroke-color="#FF0000"
+            stroke-opacity="1.0"
+            stroke-weight="2"
+          ></path>
         </ng-map> -->
         <!-- <map-dash></map-dash> -->
       </div>
