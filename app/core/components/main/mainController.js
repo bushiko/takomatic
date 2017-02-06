@@ -1,7 +1,6 @@
 define([
 	'mainModule',
 	// 'core/directives/mapDash/mapDash',
-  'google-maps',
   'core/resources/driverResource',
   'core/resources/clientResource',
   'core/services/PusherCli',
@@ -11,7 +10,7 @@ define([
 
 	mainModule.controller('mainController', mainController);
 
-	function mainController($scope, $timeout, $interval, $http, $filter,
+	function mainController($scope, $q, $timeout, $interval, $http, $filter,
     driverResource, clientResource, PusherCli, MAPBOX_API_KEY, API_URL) {
 		var _this = this;
 
@@ -44,6 +43,11 @@ define([
             name: 'Huella de conductor',
             type: 'group',
             visible: true
+          },
+          clientTrail: {
+            name: 'Huella de cliente',
+            type: 'group',
+            visible: true
           }
         }
       };
@@ -58,53 +62,25 @@ define([
       /*mapbox*/
       this.defaults = {
         minZoom: 13,
-        tileLayer: 'https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token=' + MAPBOX_API_KEY
       };
       /*mapbox*/
-
-
-  /*		$interval(function() {
-        var coords = getRandomCoords(BOUNDS);
-        console.log(coords);
-  			$scope.markers[0].lat = coords.lat;
-        $scope.markers[0].lng = coords.lng;
-  		}, 500);*/
-
 
       this.getDrivers();
       this.getClients();
 
       PusherCli.client.subscribe('tako-channel');
       PusherCli.client.bind('new-driver', function(data) {
-        console.log(data);
-
-        $scope.$apply(function() {
-          _this.driverList.push(data.driver);
-          
-          _this.markers.push(data.driver);
-          _this.addPath(data.driver);
-          _this.updateNearest();
-        });
+        $scope.$apply(_this.onNewDriver(data.driver));
+      });
+      PusherCli.client.bind('new-client', function(data) {
+        $scope.$apply(_this.onNewClient(data.client));
       });
 
       PusherCli.client.bind('driver-location-changed', function(data) {
-        console.log(data);
-
-        var updatedDriver = data.driver;
-        var driver = $filter('filter')(_this.driverList, {id: updatedDriver.id});
-
-        if(angular.isArray(driver) && driver[0]) {
-          $scope.$apply(function() {
-            driver[0].lat = updatedDriver.lat;
-            driver[0].lng = updatedDriver.lng;
-
-            _this.updatePath(driver[0]);
-
-            _this.updateNearest();
-          });
-        }
-
-
+        $scope.$apply(_this.onDriverLocationChanged(data));
+      }); 
+      PusherCli.client.bind('client-location-changed', function(data) {
+        $scope.$apply(_this.onClientLocationChanged(data));
       });
     };
 
@@ -114,46 +90,10 @@ define([
         _this.driverList = res;
 
         _this.driverList.forEach(function(driver) {
-          _this.markers.push(driver);
-          _this.addPath(driver);
+          _this.drawDriver(driver);
         });
 
         _this.updateNearest();
-
-
-         /* var mockOrigin = getRandomCoords(_this.maxbounds);
-          var mockDest = getRandomCoords(_this.maxbounds);
-          var query = mockOrigin.lng+','+mockOrigin.lat+';'+mockDest.lng+','+mockDest.lat;
-
-          $http({
-            method: 'get',
-            url: 'https://api.mapbox.com/directions/v5/mapbox/walking/'+query+'.json',
-            params: {
-              access_token: MAPBOX_API_KEY,
-              steps: true
-            }
-          }).then(function(res) {
-              if(res.data.code === 'Ok') {
-                // mock movement
-
-                res.data.routes[0].legs[0].steps.forEach(function(_step) {
-                  _step.intersections.forEach(function(_path) {
-                    return mockPaths.push({
-                      lng: _path.location[0],
-                      lat: _path.location[1],
-                      duration: (_step.duration / _step.intersections.length)
-                    });
-                  });
-                });
-                autoRefresh(0);
-                // console.log(mockPaths);
-                // mock movement
-              }
-
-              console.log(res.data);
-            });
-*/
-        console.log(res);
       });
     };
 
@@ -161,7 +101,12 @@ define([
       // Obtenemos clients
       clientResource.query(function(res) {
         _this.clientList = res;
-        console.log(res);
+
+        _this.clientList.forEach(function(client) {
+          _this.drawClient(client);
+        });
+
+        _this.updateNearest();
       });
     };
 
@@ -171,6 +116,8 @@ define([
 
       var fd = new FormData();
       fd.append('name', newDriver.name);
+
+      this.driverErrors = {};
 
       this.savingDriver = true;
       driverResource.save(fd, function(res) {
@@ -187,59 +134,228 @@ define([
       });
     };
 
+    this.saveClient = function(newClient) {
+      if(!angular.isObject(newClient)
+        || typeof newClient.name !== 'string') {return;}
 
-    this.addPath = function(driver) {
-      this.paths[driver.id] = {
-        weight: 2,
-        color: '#00d1b2',
-        layer: 'driverTrail',
-        latlngs: [{lat: driver.lat, lng: driver.lng}],
+      var fd = new FormData();
+      fd.append('name', newClient.name);
+
+      this.clientErrors = {};
+
+      this.savingClient = true;
+      clientResource.save(fd, function(res) {
+        delete _this.savingClient;
+        newClient.name = '';
+
+        // no agregamos hasta que pusher nos notifique
+      }, function(err){
+        delete _this.savingClient;
+
+        if (angular.isObject(err.data) && err.status === 422) {
+          _this.clientErrors = err.data;
+        }
+      });
+    };
+
+    this.drawDriver = function(driver) {
+      var driverIcon = {
+        type: 'awesomeMarker',
+        icon: 'taxi',
+        markerColor: 'green'
+      };
+
+      _this.markers.push(angular.extend(driver, {
+        icon: driverIcon,
+        message: driver.name
+      }));
+      _this.addPath(driver);
+    };
+
+    this.onNewDriver = function(driver) {
+      _this.driverList.push(driver);
+      _this.drawDriver(driver);
+
+      _this.updateNearest();
+    };
+
+    this.drawClient = function(client) {
+      var clientIcon = {
+        type: 'awesomeMarker',
+        icon: 'male',
+        markerColor: 'purple'
+      };
+
+      _this.markers.push(angular.extend(client, {
+        icon: clientIcon,
+        message: client.name,
+        // draggable: true
+      }));
+      _this.addPath(client);
+    };
+
+    this.onNewClient = function(client) {
+      _this.clientList.push(client);
+      _this.drawClient(client);
+
+      _this.updateNearest();
+    };
+
+
+    this.onDriverLocationChanged = function(data) {
+      console.log(data);
+
+      var updatedDriver = data.driver;
+      var driver = $filter('filter')(_this.driverList, {id: updatedDriver.id});
+
+      if(angular.isArray(driver) && driver[0]) {
+        driver[0].lat = updatedDriver.lat;
+        driver[0].lng = updatedDriver.lng;
+
+        _this.updatePath(driver[0]);
+
+        _this.updateNearest();
       }
     };
 
-    this.updatePath = function(driver) {
-      this.paths[driver.id].latlngs.push({lat: driver.lat, lng: driver.lng});
+    this.onClientLocationChanged = function(data) {
+      console.log(data);
+      var updatedClient = data.client;
+      var client = $filter('filter')(_this.clientList, {id: updatedClient.id});
+
+      if(angular.isArray(client) && client[0]) {
+        client[0].lat = updatedClient.lat;
+        client[0].lng = updatedClient.lng;
+
+        _this.updatePath(client[0]);
+
+        _this.updateNearest();
+      }
+    };
+
+
+    this.addPath = function(user) {
+      var layer = user.role === 'DRIVER'
+        ? 'driverTrail'
+        : 'clientTrail';
+
+      var color = user.role === 'DRIVER'
+        ? '#00d1b2'
+        : '#9977ff';
+
+      this.paths[user.id] = {
+        weight: 2,
+        color: color,
+        layer: layer,
+        latlngs: [{lat: user.lat, lng: user.lng}],
+      }
+    };
+
+    this.updatePath = function(user) {
+      this.paths[user.id].latlngs.push({lat: user.lat, lng: user.lng});
     };
 
     this.updateNearest = function() {
       _this.driverList.forEach(function(driver) {
-        var nearest = getNearest(driver);
-        // console.log(nearest);
+        delete driver.nearest;
 
-        if(nearest) {
+        getNearest(driver)
+        .then(function(nearest) {
+          driver.nearest = nearest;
+
+          return getDirections(driver, nearest);
+        })
+        .then(function(direction) {
+
+          driver.distanceToNearest = direction.distance;
+          driver.durationToNearest = direction.duration;
+
           _this.paths['nrst'+driver.id] = {
             weight: 2,
-            color: '#fff',
+            color: '#ccc',
             layer: 'nearest',
-            latlngs: [{lat: driver.lat, lng: driver.lng}, {lat: nearest.lat, lng: nearest.lng}],
+            latlngs: direction.paths,
+            message: 'Cliente mas cercano de ' + driver.name
           }
-        }
+        });
       });
     };
 
     function getNearest(driver) {
-      var nearest = null;
-      var minDist = null;
+      return $q(function(resolve, reject) {
+        var nearest = null;
+        var minDist = null;
 
-      _this.driverList.forEach(function(_driver) {
-        if(_driver.id === driver.id) { return; }
+        _this.clientList.forEach(function(_client) {
+          var dist = getDistance(driver.lat, driver.lng, _client.lat, _client.lng);
 
-        var dist = getDistance(driver.lat, driver.lng, _driver.lat, _driver.lng);
+          if(minDist === null) {
+            minDist = dist;
+            nearest = _client;
+            return;
+          }
 
-        if(minDist === null) {
-          minDist = dist;
-          nearest = _driver;
-          return;
+          if(dist < minDist) {
+            minDist = dist;
+            nearest = _client;
+          }
+        });
+
+        if(nearest === null) {
+          return reject();
         }
 
-        if(dist < minDist) {
-          minDist = dist;
-          nearest = _driver;
-        }
+        return resolve(nearest);
       });
+    };
 
-      return nearest;
-    }
+    function getDirections(origin, destination) {
+      return $q(function(resolve, reject) {
+        var query = origin.lng+','+origin.lat+';'+destination.lng+','+destination.lat;
+
+        $http({
+          method: 'get',
+          url: 'https://api.mapbox.com/directions/v5/mapbox/walking/'+query+'.json',
+          params: {
+            access_token: MAPBOX_API_KEY,
+            steps: true
+          },
+        })
+        .then(function(res) {
+          if(angular.isObject(res.data)
+            && res.data.code === 'Ok' 
+            && res.data.routes
+            && res.data.routes[0]) {
+
+            var route = res.data.routes[0];
+            // la ruta tambien devuelve:
+            // .distance en metros
+            // .duration en segundos
+
+            var paths = [];
+
+            route.legs[0].steps.forEach(function(_step) {
+              _step.intersections.forEach(function(_path) {
+                return paths.push({
+                  lng: _path.location[0],
+                  lat: _path.location[1],
+                });
+              });
+            });
+            // console.log(paths);
+
+            return resolve({
+              duration: route.duration,
+              distance: route.distance,
+              paths: paths
+            });
+          }
+
+          return reject();
+        });
+      });
+    };
+
 
     function getDistance(lat1,lon1,lat2,lon2) {
       var R = 6371; // Radius of the earth in km

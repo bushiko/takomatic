@@ -25,9 +25,9 @@
     "angular-resource": "1.5.9",
     "pusher-js": "pusher#~4.0.0",
     "ui-leaflet": "^2.0.0",
-    "ngmap": "^1.17.8",
     "angular-simple-logger": "^0.1.7",
-    "requirejs-plugins": "~1.0.3"
+    "requirejs-plugins": "~1.0.3",
+    "Leaflet.awesome-markers": "~2.0.2"
   },
   "resolutions": {
     "angular": "1.4.9"

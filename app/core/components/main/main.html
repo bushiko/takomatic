@@ -57,10 +57,6 @@
         </div>
 
         <div ng-show="activeTab === 'drivers'">
-          <ul>
-            <li ng-repeat="driver in vm.driverList">{{::driver.name}}</li>
-          </ul>
-
           <form ng-submit="vm.saveDriver(newD)">
             <p class="control has-addons">
               <input 
@@ -76,6 +72,70 @@
               <small ng-show="vm.driverErrors.name">{{vm.driverErrors.name}}</small>
             </p>
           </form>
+
+          <div class="userList">
+            <div class="media" ng-repeat="driver in vm.driverList">
+              <figure class="media-left">
+                <p class="image is-32x32">
+                  <img src="http://bulma.io/images/placeholders/128x128.png">
+                </p>
+              </figure>
+
+              <div class="media-content">
+                <a>{{::driver.name}}</a>
+              </div>
+
+              <div class="media-right">
+                <div ng-if="driver.nearest">
+                  <ul>
+                    <li>
+                      <small class="level-item">
+                        {{driver.nearest.name}}
+                      </small>
+                    </li>
+                    <li>
+                      <small>
+                        <i class="fa fa-clock-o"></i>
+                        {{driver.durationToNearest}} seg
+                      </small>
+                    </li>
+                    <li>
+                      <small>
+                        <i class="fa fa-road"></i>
+                        {{driver.distanceToNearest}} m
+                      </small>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div ng-show="activeTab === 'clients'">
+          <form ng-submit="vm.saveClient(newC)">
+            <p class="control has-addons">
+              <input 
+                ng-model="newC.name" 
+                ng-class="{'is-danger': vm.clientErrors.name}"
+                class="input" type="text" placeholder="nombre">
+              <a 
+                ng-class="{'is-loading': vm.savingClient}"
+                ng-click="vm.saveClient(newC)"
+                class="button is-primary">
+                +
+              </a>
+              <small ng-show="vm.clientErrors.name">{{vm.clientErrors.name}}</small>
+            </p>
+          </form>
+
+          <div class="userList">
+            <div class="media" ng-repeat="client in vm.clientList">
+              <div class="media-content">
+                {{::client.name}}
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>

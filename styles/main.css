@@ -1,0 +1,11 @@
+.userList {
+	height: 200px;
+	max-height: 200px;
+	overflow-y: scroll;
+	margin-top: 15px;
+}
+
+.awesome-marker i {
+    font-size: 15px;
+    margin-top: 12px;
+}

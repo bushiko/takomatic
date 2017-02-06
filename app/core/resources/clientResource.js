@@ -6,7 +6,11 @@ define(['angularAMD'], function(angularAMD){
 	function clientResource($resource, API_URL) {
 		return $resource(API_URL + '/client', {
 			}, {
-			
+			save: {
+				method: 'POST',
+				transformRequest: angular.identity,
+				headers: {'Content-Type': undefined}
+			},
 		});
 	}
 });

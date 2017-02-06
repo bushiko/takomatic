@@ -5,12 +5,11 @@ define([
 	'ui-router',
 	'angular-resource',
   	'ui-leaflet',
-  	'ng-map',
 ], function(angularAMD, routes) {
 	'use strict';
 
 	var mainModule = angular.module('mainModule', 
-		['ui.router', 'ngResource', 'ui-leaflet', 'ngMap']);
+		['ui.router', 'ngResource', 'ui-leaflet']);
 
 	mainModule.config(routes);
 
@@ -20,6 +19,9 @@ define([
 	mainModule.run(function($state) {
 
     $state.go('main');
+
+    // Prefix para los markers con fontAwesome
+     L.AwesomeMarkers.Icon.prototype.options.prefix = 'fa';
   });
 
 	return angularAMD.bootstrap(mainModule);
