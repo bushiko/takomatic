@@ -62,7 +62,7 @@
               <input 
                 ng-model="newD.name" 
                 ng-class="{'is-danger': vm.driverErrors.name}"
-                class="input" type="text" placeholder="nombre">
+                class="input" type="text" placeholder="nombre de conductor">
               <a 
                 ng-class="{'is-loading': vm.savingDriver}"
                 ng-click="vm.saveDriver(newD)"
@@ -75,11 +75,11 @@
 
           <div class="userList">
             <div class="media" ng-repeat="driver in vm.driverList">
-              <figure class="media-left">
-                <p class="image is-32x32">
-                  <img src="http://bulma.io/images/placeholders/128x128.png">
-                </p>
-              </figure>
+              <div class="media-left">
+                <div class="roleIcon driver">
+                  <i class="fa fa-taxi"></i>
+                </div>
+              </div>
 
               <div class="media-content">
                 <a>{{::driver.name}}</a>
@@ -118,7 +118,7 @@
               <input 
                 ng-model="newC.name" 
                 ng-class="{'is-danger': vm.clientErrors.name}"
-                class="input" type="text" placeholder="nombre">
+                class="input" type="text" placeholder="nombre de cliente">
               <a 
                 ng-class="{'is-loading': vm.savingClient}"
                 ng-click="vm.saveClient(newC)"
@@ -131,8 +131,18 @@
 
           <div class="userList">
             <div class="media" ng-repeat="client in vm.clientList">
+              <div class="media-left">
+                <div class="roleIcon client">
+                  <i class="fa fa-male"></i>
+                </div>
+              </div>
+
               <div class="media-content">
                 {{::client.name}}
+              </div>
+
+              <div class="media-right">
+                <a ng-click="vm.deleteClient(client)" class="delete is-small"></a>
               </div>
             </div>
           </div>

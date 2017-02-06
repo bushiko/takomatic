@@ -9,3 +9,25 @@
     font-size: 15px;
     margin-top: 12px;
 }
+
+.roleIcon {
+	width: 20px;
+	height: 20px;
+    color: #fff;
+    padding: 5px;
+    border-radius: 20px;
+}
+
+.roleIcon.driver {
+    background: #72af26;
+}
+.roleIcon.driver i {
+    font-size: 14px;
+}
+
+.roleIcon.client {
+	background: #d152b8;
+}
+.roleIcon.client i {
+    font-size: 23px;
+}

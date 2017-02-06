@@ -158,6 +158,23 @@ define([
       });
     };
 
+    this.deleteClient = function(client) {
+      if(client.isDeleting) { return; }
+
+      clientResource.delete({client_id: client.id}, function(res) {
+        delete client.deleteClient;
+
+        var idx = _this.clientList.indexOf(client);
+        if(idx !== -1) {
+          _this.undraw(client);
+          _this.clientList.splice(idx, 1);
+        }
+      }, function(err) {
+        delete client.deleteClient;
+      });
+    };
+
+
     this.drawDriver = function(driver) {
       var driverIcon = {
         type: 'awesomeMarker',
@@ -166,6 +183,7 @@ define([
       };
 
       _this.markers.push(angular.extend(driver, {
+        id: driver.id,
         icon: driverIcon,
         message: driver.name
       }));
@@ -187,11 +205,22 @@ define([
       };
 
       _this.markers.push(angular.extend(client, {
+        id: client.id,
         icon: clientIcon,
         message: client.name,
         // draggable: true
       }));
       _this.addPath(client);
+    };
+
+    this.undraw = function(user) {
+      var marker = $filter('filter')(_this.markers, {id: user.id});
+      if(marker && marker[0]) {
+        var idx = _this.markers.indexOf(marker[0]);
+        _this.markers.splice(idx, 1);
+      }
+
+      delete this.paths[user.id];
     };
 
     this.onNewClient = function(client) {

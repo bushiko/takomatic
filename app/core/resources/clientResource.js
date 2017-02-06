@@ -4,7 +4,7 @@ define(['angularAMD'], function(angularAMD){
 	angularAMD.service('clientResource', clientResource);
 	
 	function clientResource($resource, API_URL) {
-		return $resource(API_URL + '/client', {
+		return $resource(API_URL + '/client/:client_id', {
 			}, {
 			save: {
 				method: 'POST',
