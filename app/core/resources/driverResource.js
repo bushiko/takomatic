@@ -4,7 +4,7 @@ define(['angularAMD'], function(angularAMD){
 	angularAMD.service('driverResource', driverResource);
 	
 	function driverResource($resource, API_URL) {
-		return $resource(API_URL + '/driver', {
+		return $resource(API_URL + '/driver/:driver_id', {
 			}, {
 			save: {
 				method: 'POST',

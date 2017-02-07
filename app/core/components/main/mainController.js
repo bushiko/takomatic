@@ -82,6 +82,14 @@ define([
       PusherCli.client.bind('client-location-changed', function(data) {
         $scope.$apply(_this.onClientLocationChanged(data));
       });
+
+      PusherCli.client.bind('deleted-driver', function(data) {
+        $scope.$apply(_this.onDriverDeleted(data.driverId));
+      });
+      PusherCli.client.bind('deleted-client', function(data) {
+        $scope.$apply(_this.onClientDeleted(data.clientId));
+      });
+
     };
 
     this.getDrivers = function() {
@@ -134,6 +142,37 @@ define([
       });
     };
 
+    this.deleteDriver = function(driver) {
+      if(driver.isDeleting) { return; }
+
+      driver.isDeleting = true;
+      driverResource.delete({driver_id: driver.id}, function(res) {
+        delete driver.deleteClient; 
+      }, function(err) {
+        delete driver.deleteClient;
+      });
+    };
+
+    this.onDriverDeleted = function(driverId) {
+      var driver = $filter('filter')(_this.driverList, {id: driverId});
+
+      if(angular.isArray(driver) && driver[0]) {
+        _this.undraw(driver[0]);
+        var idx = _this.driverList.indexOf(driver[0]);
+        _this.driverList.splice(idx, 1);
+      }
+    };
+    
+    this.onClientDeleted = function(clientId) {
+      var client = $filter('filter')(_this.clientList, {id: clientId});
+
+      if(angular.isArray(client) && client[0]) {
+        _this.undraw(client[0]);
+        var idx = _this.clientList.indexOf(client[0]);
+        _this.clientList.splice(idx, 1);
+      }
+    };
+
     this.saveClient = function(newClient) {
       if(!angular.isObject(newClient)
         || typeof newClient.name !== 'string') {return;}
@@ -161,19 +200,13 @@ define([
     this.deleteClient = function(client) {
       if(client.isDeleting) { return; }
 
+      client.isDeleting = true;
       clientResource.delete({client_id: client.id}, function(res) {
         delete client.deleteClient;
-
-        var idx = _this.clientList.indexOf(client);
-        if(idx !== -1) {
-          _this.undraw(client);
-          _this.clientList.splice(idx, 1);
-        }
       }, function(err) {
         delete client.deleteClient;
       });
     };
-
 
     this.drawDriver = function(driver) {
       var driverIcon = {
@@ -193,6 +226,13 @@ define([
     this.onNewDriver = function(driver) {
       _this.driverList.push(driver);
       _this.drawDriver(driver);
+
+      _this.updateNearest();
+    };
+
+     this.onNewClient = function(client) {
+      _this.clientList.push(client);
+      _this.drawClient(client);
 
       _this.updateNearest();
     };
@@ -221,13 +261,18 @@ define([
       }
 
       delete this.paths[user.id];
-    };
 
-    this.onNewClient = function(client) {
-      _this.clientList.push(client);
-      _this.drawClient(client);
+      // borrar la ruta del mas cercano
+      var regexStr = 'nrst(\\d+)_'+user.id;
+      var rgx = new RegExp(regexStr);
+      var regexStr2 = 'nrst'+user.id+'_(\\d+)';
+      var rgx2 = new RegExp(regexStr2);
 
-      _this.updateNearest();
+      for(var key in _this.paths) {
+        if(rgx.test(key) || rgx2.test(key)) {
+          delete this.paths[key];
+        }
+      }
     };
 
 
@@ -295,17 +340,26 @@ define([
           return getDirections(driver, nearest);
         })
         .then(function(direction) {
+          // ya que esto se ejecuta asincrono
+          // hay que revisar que driver y driver.nearest
+          // existan
+          var idxDriver = _this.driverList.indexOf(driver);
+          var idxClient = _this.clientList.indexOf(driver.nearest);
+          if(idxDriver === -1 || idxClient === -1) {
+            return;
+          }
+
 
           driver.distanceToNearest = direction.distance;
           driver.durationToNearest = direction.duration;
 
-          _this.paths['nrst'+driver.id] = {
+          _this.paths['nrst'+driver.id+'_'+driver.nearest.id] = {
             weight: 2,
             color: '#ccc',
             layer: 'nearest',
             latlngs: direction.paths,
             message: 'Cliente mas cercano de ' + driver.name
-          }
+          };
         });
       });
     };
