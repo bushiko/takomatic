@@ -21,25 +21,6 @@
           layers="vm.layers"
           height="480px" 
           width="100%"></leaflet>
-        <!-- <ng-map 
-          style="height: 500px; background: #00d1b2;"
-          zoom="13"
-          min-zoom="13"
-        >
-          <marker 
-            ng-repeat-start="mk in vm.driverList" 
-            position="{{vm.getPosition(mk)}}"
-            label="{{mk.name}}"
-            ></marker>
-          <path
-            ng-repeat-end
-            geodesic="true"
-            stroke-color="#FF0000"
-            stroke-opacity="1.0"
-            stroke-weight="2"
-          ></path>
-        </ng-map> -->
-        <!-- <map-dash></map-dash> -->
       </div>
     </div>
     <div class="column">
@@ -84,7 +65,10 @@
               <div class="media-content">
                 <a>{{::driver.name}}</a>
 
-                <a ng-click="vm.deleteDriver(driver)" class="delete is-small"></a>
+
+                <a 
+                  ng-click="vm.deleteDriver(driver)" 
+                  class="button is-danger is-inverted is-small is-pulled-right">Eliminar</a>
               </div>
 
               <div class="media-right">
@@ -92,13 +76,14 @@
                   <ul>
                     <li>
                       <small class="level-item">
+                        + cercano:
                         {{driver.nearest.name}}
                       </small>
                     </li>
                     <li>
                       <small>
                         <i class="fa fa-clock-o"></i>
-                        {{driver.durationToNearest}} seg
+                        {{driver.durationToNearest}}
                       </small>
                     </li>
                     <li>
@@ -140,14 +125,38 @@
               </div>
 
               <div class="media-content">
-                {{::client.name}}
-                <a ng-click="vm.deleteClient(client)" class="delete is-small"></a>
+                <a>{{::client.name}}</a>
+                <a 
+                  ng-click="vm.deleteClient(client)" 
+                  class="button is-danger is-inverted is-small is-pulled-right">Eliminar</a>
               </div>
              
             </div>
           </div>
         </div>
 
+      </div>
+
+      <div class="box">
+        <div class="level">
+          <div class="level-left">
+            <p>
+              La simulacion esta {{
+                vm.simulationStatus == 0
+                  ? 'detenida'
+                  : 'corriendo'
+              }}
+            </p>
+          </div>
+          <div class="level-right">
+            <a 
+              ng-click="vm.stopSimulation()"
+              ng-if="vm.simulationStatus == 1" class="button is-warning">Detener</a>
+            <a 
+              ng-click="vm.startSimulation()"
+              ng-if="vm.simulationStatus == 0" class="button is-primary">Iniciar</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>

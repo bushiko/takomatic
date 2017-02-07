@@ -4,6 +4,7 @@ define([
   'core/resources/driverResource',
   'core/resources/clientResource',
   'core/services/PusherCli',
+  'moment',
   // 'core/factory/Driver'
 ], function(mainModule) {
 	'use strict';
@@ -11,7 +12,7 @@ define([
 	mainModule.controller('mainController', mainController);
 
 	function mainController($scope, $q, $timeout, $interval, $http, $filter,
-    driverResource, clientResource, PusherCli, MAPBOX_API_KEY, API_URL) {
+    driverResource, clientResource, PusherCli, MAPBOX_API_KEY, API_URL, moment) {
 		var _this = this;
 
     var mockPaths = [];
@@ -24,6 +25,8 @@ define([
       this.maxbounds = {};
       this.markers = [];
       this.paths = {};
+
+      this.simulationStatus = 0;
 
       this.layers = {
         baselayers: {
@@ -52,11 +55,31 @@ define([
         }
       };
 
-      $http.get(API_URL+'/bounds').then(function(res) {
+      $http.get(API_URL+'/settings').then(function(res) {
         _this.maxbounds = {
-          southWest: res.data.south_west,
-          northEast: res.data.north_east
+          southWest: {lat:0, lng: 0},
+          northEast: {lat: 0, lng: 0}
         };
+
+        res.data.forEach(function(setting) {
+          switch(setting.key) {
+            case 'SOUTH_WEST_BOUND_LAT':
+              _this.maxbounds.southWest.lat = +setting.value;
+              break;
+            case 'SOUTH_WEST_BOUND_LNG':
+              _this.maxbounds.southWest.lng = +setting.value;
+              break;
+            case 'NORTH_EAST_BOUND_LAT':
+              _this.maxbounds.northEast.lat = +setting.value;
+              break;
+            case 'NORTH_EAST_BOUND_LNG':
+              _this.maxbounds.northEast.lng = +setting.value;
+              break;
+            case 'SIMULATION_STATUS':
+              _this.simulationStatus = +setting.value;
+              break;
+          }
+        });
       });
 
       /*mapbox*/
@@ -69,6 +92,7 @@ define([
       this.getClients();
 
       PusherCli.client.subscribe('tako-channel');
+
       PusherCli.client.bind('new-driver', function(data) {
         $scope.$apply(_this.onNewDriver(data.driver));
       });
@@ -88,8 +112,13 @@ define([
       });
       PusherCli.client.bind('deleted-client', function(data) {
         $scope.$apply(_this.onClientDeleted(data.clientId));
-      });
+      });   
 
+      PusherCli.client.bind('simulation-status-changed', function(data) {
+        $scope.$apply(function() {
+          _this.simulationStatus = data.status;
+        });
+      });
     };
 
     this.getDrivers = function() {
@@ -351,7 +380,7 @@ define([
 
 
           driver.distanceToNearest = direction.distance;
-          driver.durationToNearest = direction.duration;
+          driver.durationToNearest = moment.duration(direction.duration, 'seconds').humanize();
 
           _this.paths['nrst'+driver.id+'_'+driver.nearest.id] = {
             weight: 2,
@@ -362,6 +391,14 @@ define([
           };
         });
       });
+    };
+
+    this.startSimulation = function() {
+      $http.get(API_URL + '/simulation/start');
+    };
+
+    this.stopSimulation = function() {
+      $http.get(API_URL + '/simulation/stop');
     };
 
     function getNearest(driver) {

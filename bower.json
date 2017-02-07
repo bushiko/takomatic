@@ -26,8 +26,9 @@
     "pusher-js": "pusher#~4.0.0",
     "ui-leaflet": "^2.0.0",
     "angular-simple-logger": "^0.1.7",
-    "requirejs-plugins": "~1.0.3",
-    "Leaflet.awesome-markers": "~2.0.2"
+    "Leaflet.awesome-markers": "~2.0.2",
+    "angular-moment": "~0.10.3",
+    "moment": "~2.10.6"
   },
   "resolutions": {
     "angular": "1.4.9"

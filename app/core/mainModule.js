@@ -4,12 +4,14 @@ define([
   	// libraries
 	'ui-router',
 	'angular-resource',
+	'angular-moment',
   	'ui-leaflet',
 ], function(angularAMD, routes) {
 	'use strict';
 
 	var mainModule = angular.module('mainModule', 
-		['ui.router', 'ngResource', 'ui-leaflet']);
+		['ui.router', 'ngResource', 'ui-leaflet',
+		'angularMoment']);
 
 	mainModule.config(routes);
 
